@@ -98,6 +98,10 @@ public class MapsActivity extends FragmentActivity implements
                     mMap.addMarker(new MarkerOptions().position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())).title("Marker"));
                 }
             }
+        }else{
+            if (mLastLocation != null) {
+                mMap.addMarker(new MarkerOptions().position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())).title("Marker"));
+            }
         }
     }
 
@@ -153,25 +157,6 @@ public class MapsActivity extends FragmentActivity implements
         }catch(IOException e){
             e.getMessage();
         }
-
-        /*
-        try {
-            // create HttpClient
-            HttpClient httpclient = new DefaultHttpClient();
-            // make GET request to the given URL
-            HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
-            // receive response as inputStream
-            inputStream = httpResponse.getEntity().getContent();
-            // convert inputstream to string
-            if(inputStream != null)
-                result = convertInputStreamToString(inputStream);
-            else
-                result = "Did not work!";
-
-        } catch (Exception e) {
-            Log.d("InputStream", e.getLocalizedMessage());
-        }
-        */
         return result;
     }
 
@@ -197,17 +182,32 @@ public class MapsActivity extends FragmentActivity implements
             super.onPostExecute(result);
             Toast.makeText(getBaseContext(), "Received!", Toast.LENGTH_LONG).show();
             JSONObject json = null;
-            String latitudine = "";
-            String longitudine = "";
+            Double latitudine = null;
+            Double longitudine = null;
             try{
                 json = new JSONObject(result);
-                latitudine = json.getString("lat");
-                longitudine = json.getString("lng");
+                latitudine = Double.parseDouble(json.getString("lat"));
+                longitudine = Double.parseDouble(json.getString("lng"));
             }catch (JSONException e){
                 e.getMessage();
             }
-            Double lati = Double.parseDouble(latitudine);
-            Double longi = Double.parseDouble(longitudine);
+            if (mMap == null) {
+                // Try to obtain the map from the SupportMapFragment.
+                mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+                        .getMap();
+                // Check if we were successful in obtaining the map.
+                if (mMap != null) {
+                    //Check if Location not null then set Marker.
+                    //if (mLastLocation != null) {
+                    if (latitudine != null && longitudine != null) {
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(latitudine,longitudine)).title("Marker"));
+                    }
+                }
+            }else{
+                if (latitudine != null && longitudine != null) {
+                    mMap.addMarker(new MarkerOptions().position(new LatLng(latitudine, longitudine)).title("Marker"));
+                }
+            }
         }
     }
 
