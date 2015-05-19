@@ -44,6 +44,7 @@ public class MapsActivity extends FragmentActivity implements
         buildGoogleApiClient();
     }
 
+    //Build GoogleApiClient
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -53,29 +54,25 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     @Override
-    public void onConnected(Bundle connectionHint) {
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        if (mLastLocation != null) {
-            if (mMap == null) {
-                // Try to obtain the map from the SupportMapFragment.
-                mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
-                        .getMap();
-                // Check if we were successful in obtaining the map.
-                if (mMap != null) {
-                    mMap.addMarker(new MarkerOptions().position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())).title("Marker"));
-                }
-            }
-            //mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
-            //mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
-        }else{
-            if (mMap == null) {
-                // Try to obtain the map from the SupportMapFragment.
-                mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
-                        .getMap();
+    protected void onStart() {
+        super.onStart();
+        if (!mResolvingError) {  // more about this later
+            mGoogleApiClient.connect();
+        }
+    }
 
-                // Check if we were successful in obtaining the map.
-                if (mMap != null) {
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
+        if (mMap == null) {
+            // Try to obtain the map from the SupportMapFragment.
+            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+                    .getMap();
+            // Check if we were successful in obtaining the map.
+            if (mMap != null) {
+                //Check if Location not null then set Marker.
+                if (mLastLocation != null) {
                     mMap.addMarker(new MarkerOptions().position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())).title("Marker"));
                 }
             }
@@ -130,13 +127,7 @@ public class MapsActivity extends FragmentActivity implements
 
 
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        //if (!mResolvingError) {  // more about this later
-            mGoogleApiClient.connect();
-        //}
-    }
+
 
     @Override
     protected void onStop() {
