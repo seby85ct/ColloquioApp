@@ -6,8 +6,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 
 import com.google.android.gms.common.ConnectionResult;
@@ -21,6 +23,25 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.location.LocationServices;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class MapsActivity extends FragmentActivity implements
         ConnectionCallbacks, OnConnectionFailedListener {
@@ -42,6 +63,7 @@ public class MapsActivity extends FragmentActivity implements
         setContentView(R.layout.activity_maps);
         //setUpMapIfNeeded();
         buildGoogleApiClient();
+        new GetRemotePositionTask().execute();
     }
 
     //Build GoogleApiClient
@@ -109,6 +131,97 @@ public class MapsActivity extends FragmentActivity implements
             mResolvingError = true;
         }
     }
+
+
+    public static String GET(String urlStr){
+        //InputStream inputStream = null;
+        String result = "";
+        URL url = null;
+        try{
+            url = new URL(urlStr);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+
+            // read the response
+            System.out.println("Response Code: " + conn.getResponseCode());
+            InputStream in = new BufferedInputStream(conn.getInputStream());
+            if(in != null)
+                result = convertInputStreamToString(in);
+            System.out.println(result);
+        }catch (MalformedURLException e){
+            e.getMessage();
+        }catch(IOException e){
+            e.getMessage();
+        }
+
+        /*
+        try {
+            // create HttpClient
+            HttpClient httpclient = new DefaultHttpClient();
+            // make GET request to the given URL
+            HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
+            // receive response as inputStream
+            inputStream = httpResponse.getEntity().getContent();
+            // convert inputstream to string
+            if(inputStream != null)
+                result = convertInputStreamToString(inputStream);
+            else
+                result = "Did not work!";
+
+        } catch (Exception e) {
+            Log.d("InputStream", e.getLocalizedMessage());
+        }
+        */
+        return result;
+    }
+
+    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+        String line = "";
+        String result = "";
+        while((line = bufferedReader.readLine()) != null)
+            result += line;
+        inputStream.close();
+        return result;
+    }
+
+    private class GetRemotePositionTask extends AsyncTask<Void, Void, String> {
+
+        @Override
+        protected String doInBackground(Void... params) {
+            return GET("http://dev.ctmobi.it/coordinate.php");
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            Toast.makeText(getBaseContext(), "Received!", Toast.LENGTH_LONG).show();
+            JSONObject json = null;
+            String latitudine = "";
+            String longitudine = "";
+            try{
+                json = new JSONObject(result);
+                latitudine = json.getString("lat");
+                longitudine = json.getString("lng");
+            }catch (JSONException e){
+                e.getMessage();
+            }
+            Double lati = Double.parseDouble(latitudine);
+            Double longi = Double.parseDouble(longitudine);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
