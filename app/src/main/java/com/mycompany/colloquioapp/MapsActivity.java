@@ -63,7 +63,7 @@ public class MapsActivity extends FragmentActivity implements
         setContentView(R.layout.activity_maps);
         //setUpMapIfNeeded();
         buildGoogleApiClient();
-        new GetRemotePositionTask().execute();
+
     }
 
     //Build GoogleApiClient
@@ -78,9 +78,11 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     protected void onStart() {
         super.onStart();
+        ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap().clear();
         if (!mResolvingError) {  // more about this later
             mGoogleApiClient.connect();
         }
+        new GetRemotePositionTask().execute();
     }
 
     @Override
