@@ -9,6 +9,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.widget.Toast;
 
 
@@ -45,8 +46,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class MapsActivity extends FragmentActivity implements
-        ConnectionCallbacks, OnConnectionFailedListener {
+public class MapsActivity extends FragmentActivity implements ConnectionCallbacks, OnConnectionFailedListener {
 
     // Request code to use when launching the resolution activity
     private static final int REQUEST_RESOLVE_ERROR = 1001;
@@ -222,17 +222,6 @@ public class MapsActivity extends FragmentActivity implements
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_RESOLVE_ERROR) {
@@ -247,17 +236,11 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
-
-
-
-
-
     @Override
     protected void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
     }
-
 
     @Override
     protected void onResume() {
